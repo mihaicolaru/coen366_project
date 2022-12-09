@@ -15,30 +15,43 @@ while 1:
     connected = True
 
     while connected:
-        # listen for request messages from server, in try catch block in case connection broken
-        request = connection.recv(1024).decode()
-        # try:
-        #     request = connection.recv(1024).decode()
-        #     if len(request) == 0:
-        #         print("read 0 bytes")
-        # except BlockingIOError:
-        #     print("reading")
-        # except ConnectionResetError:
-        #     print("connection was reset")
-        #     break
-        # except BrokenPipeError:
-        #     print("connection was broken")
-        #     break
+        # listen for request messages from client, in try catch block in case connection broken
+        try:
+            request = connection.recv(1024).decode()
+        except BlockingIOError:
+            print("reading")
+        except ConnectionResetError:
+            print("connection was reset")
+            break
+        except BrokenPipeError:
+            print("connection was broken")
+            break
 
-        print(request)
+        if len(request) == 0:
+            print("no data")
+            break
+
+        print("request: ",request)
         # parge request message
         # 3 first characters: opcode
 
-        # switch(opcode) (generate response string)
-        # put (000)
-        # get (001)
-        # change (010)
-        # help (011)
+        opcode = request[0:3]
+        print("opcode: ",opcode)
+        if opcode == '000':
+            print("put command")
+        elif opcode == '001':
+            print("get command")
+        elif opcode == '010':
+            print("change command")
+        elif opcode == '011':
+            print("help command")
+        else:
+            print("opcode error")
+        # FL = request[3:7]
+        # file_name = request[7:7+FL+1]
+        
+        # FS = request[7+FL+2:7+FL+2]
+
 
         # send back response string
         response = 'received: ' + request

@@ -1,46 +1,48 @@
-# here is where we write the client side code
-
 import socket
 
+# open socken
 s = socket.socket()
-host = input(str("Please enter the host address of the sender:"))
-port = 10020
-s.connect((host, port))
+host = input(str("Please enter the server IP address: "))
+port = input(str("please enter the server port number: "))
+s.connect((host,int(port)))
 print("Client is connected....")
 
-# start while(1)
+while 1:
+    # get user command from std input
+    command = input(str("please enter command: "))
+    
+    # split input string by " "
 
-# get user command from std input
+    # parse set of split input string with switch (inputset[0])
 
-# split input string by " "
+    # generate request msg in switch according to command
 
-# parse set of split input string with switch (inputset[0])
-# generate request msg in switch according to command
+    # put filename
+    # getting the transfer_file
+    # filename = input(str(" Enter a filename for the incoming file: "))
+    # file = open(filename, 'wb')
+    # write file content and size (etc) in msg request
+    
 
-# put filename
-# getting the transfer_file
-filename = input(str(" Enter a filename for the incoming file: "))
-file = open(filename, 'wb')
-# write file content and size (etc) in msg request
-file_data = s.recv(1024)
-file.write(file_data)
-print(file_data)
-file.close()
-print(" The file has been received ")
+    # get filename
 
-# get filename
+    # change old new
 
-# change old new
+    # help
 
-# help
+    # bye
+    # break
+    if command == 'bye':
+        break
 
-# bye
-# break
+    # send request msg to server
+    s.send(command.encode())
 
-# send request msg to server, listen for response
-
-# after response or timeout, loop
-
-
+    # listen for response
+    response = s.recv(1024)
+    print(response.decode())
+    # after response or timeout, loop
+    
 # after loop, close conntection to server
-
+s.close()
+print("connection closed")

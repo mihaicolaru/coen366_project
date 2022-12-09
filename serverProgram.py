@@ -1,40 +1,57 @@
-# here is where we write the server side code
-
 import socket
 
-# need to give commandline argument for port number to listen to
+# get port number
 s = socket.socket()
-host = socket.gethostname()
-port = 10020
-s.bind((host,port))
+host = '127.0.0.1'
+port = input(str("enter port server will listen on: "))
+s.bind((host,int(port)))
 s.listen(1)
 print(host)
-print("waiting for connectors")
-connection, address = s.accept()
-print(address,"Has been connected to the server")
 
-# while (1)
+while 1:
+    print("waiting for clients")
+    connection, address = s.accept()
+    print(address," has been connected to the server")
+    connected = True
 
-# listen for request messages from server
+    while connected:
+        # listen for request messages from server, in try catch block in case connection broken
+        request = connection.recv(1024).decode()
+        # try:
+        #     request = connection.recv(1024).decode()
+        #     if len(request) == 0:
+        #         print("read 0 bytes")
+        # except BlockingIOError:
+        #     print("reading")
+        # except ConnectionResetError:
+        #     print("connection was reset")
+        #     break
+        # except BrokenPipeError:
+        #     print("connection was broken")
+        #     break
 
-# parge request message
-# 3 first characters: opcode
+        print(request)
+        # parge request message
+        # 3 first characters: opcode
 
-# switch(opcode) (generate response string)
-# put (000)
-# get (001)
-# change (010)
-# help (011)
+        # switch(opcode) (generate response string)
+        # put (000)
+        # get (001)
+        # change (010)
+        # help (011)
 
-# send back response string
+        # send back response string
+        response = 'received: ' + request
+        try:
+            connection.send(response.encode())
+        except ConnectionResetError:
+            print("connection was reset")
+            break
+        except BrokenPipeError:
+            print("connection was broken")
+            break
 
-# if connection broken, go back to listening for connections
+        # if connection broken, go back to listening for connections
 
-
-# transferring file
-transfer_file = input(str("Enter the filename that will be transferred: "))
-transfer_file = open(transfer_file,'rb')
-file_data = transfer_file.read(1024)
-print(file_data)
-s.send(file_data)
-print("file has been sent")
+print("server terminating")
+connection.close()

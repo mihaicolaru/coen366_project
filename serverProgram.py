@@ -50,6 +50,9 @@ while 1:
         except BrokenPipeError:
             print("connection was broken")
             break
+        except ConnectionAbortedError:
+            print("connection was aborted")
+            break
 
         # if connection broken, go back to listening for connections
 

@@ -71,6 +71,10 @@ while 1:
             file_data = request[8+FL+32:]
             print("file data: ",file_data)
 
+            new_file = open(file_name, "w")
+            new_file.write(file_data)
+            new_file.close()
+
         elif opcode == '001':
             print("get command")
             print("rest of request: ",request[3:])

@@ -188,7 +188,7 @@ while 1:
         FS = int("0b" + response[8+FL:8+FL+32], 2)
         if debug:
             print("file size", FS)
-        file_data = response[8:FL+32:]
+        file_data = response[FL+40:]
         if debug:
             print("file data", file_data)
 

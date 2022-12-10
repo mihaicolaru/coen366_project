@@ -184,16 +184,17 @@ while 1:
     elif res_code == '001':
         print("successful get")
         FL = int("0b" + response[3:8], 2)
-        print("filename length", FL)
-
+        if debug:
+            print("filename length", FL)
         file_name = response[8:8+FL]
-        print("filename", file_name)
-
+        if debug:
+            print("filename", file_name)
         FS = int("0b" + response[8+FL:8+FL+32], 2)
-        print("file size", FS)
-
+        if debug:
+            print("file size", FS)
         file_data = response[8:FL+32:]
-        print("file data", file_data)
+        if debug:
+            print("file data", file_data)
 
         new_file = open(file_name, "w")
         new_file.write(file_data)
@@ -207,7 +208,7 @@ while 1:
         print("Unsuccessful change")
     elif res_code == '110':
         help_message = response[8:]
-        print("help message: \n", help_message)
+        print("help message:\n", help_message)
 
 # after loop, close connection to server
 s.close()

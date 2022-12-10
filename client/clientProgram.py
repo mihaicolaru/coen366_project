@@ -39,8 +39,7 @@ def parse_input(input_string):
             if debug:
                 print("filename: ", string_set[1])  # put filename
         except IndexError:
-            if debug:
-                print("Filename not found")  # try open filename, file not found exception just prints file not found
+            print("Filename not found")  # try open filename, file not found exception just prints file not found
             return False, "error"
 
         try:
@@ -48,8 +47,7 @@ def parse_input(input_string):
             if debug:
                 print("file is open")
         except Exception:
-            if debug:
-                print("file not found")
+            print("file not found")
             return False, "error"
 
         # if file is open
@@ -83,8 +81,7 @@ def parse_input(input_string):
             if debug:
                 print("filename: ", string_set[1])  # get filename
         except IndexError:
-            if debug:
-                print("File not found")
+            print("File not found")
             return False, "error"
 
         FL = bin(len(string_set[1]))[2:] # get length of filename, append to request (5 bits)
@@ -122,8 +119,7 @@ def parse_input(input_string):
             request = request + str(new_fl)  # append new filename length to request
             request = request + string_set[2]  # append new filename to request
         except IndexError:
-            if debug:
-                print("Filename missing")
+            print("Filename missing")
             return False, "error"
 
         return True, request

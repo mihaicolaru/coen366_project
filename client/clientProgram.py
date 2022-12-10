@@ -43,7 +43,7 @@ def parse_input(input_string):
             return False, "error"
 
         try:
-            file = open(string_set[1], "r")
+            file = open(string_set[1], "rb")
             if debug:
                 print("file is open")
         except Exception:
@@ -70,7 +70,7 @@ def parse_input(input_string):
         if debug:
             print("FS is ", str(FS))
         request = request + str(FS)   # append file data length to request
-        request = request + file_data  # append file data to request
+        request = request + str(file_data)  # append file data to request
 
         return True, request
     elif string_set[0] == "get":
@@ -191,8 +191,9 @@ while 1:
         file_data = response[FL+40:]
         if debug:
             print("file data", file_data)
-
-        new_file = open(file_name, "w")
+        
+        # try catch
+        new_file = open(file_name, "wb")
         new_file.write(file_data)
         new_file.close()
 

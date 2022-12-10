@@ -1,9 +1,26 @@
 import socket
+import sys
+
+#input host number
+try:
+    print("IP address given", sys.argv[1])
+    print("Port given", sys.argv[2])
+except IndexError:
+    quit("No port or IP address given")
+
+try:
+    print("Debug enabled:", sys.argv[3])
+    if sys.argv[3] == 1:
+        debug = True
+    else:
+        debug = False
+except IndexError:
+    quit("debug bit not given")
 
 # open socket
 s = socket.socket()
-host = input(str("Please enter the server IP address: "))
-port = input(str("please enter the server port number: "))
+host = sys.argv[1]
+port = sys.argv[2]
 s.connect((host, int(port)))
 print("client is connected....")
 
@@ -134,6 +151,6 @@ while 1:
     response = s.recv(1024)
     print(response.decode())
 
-# after loop, close conntection to server
+# after loop, close connection to server
 s.close()
 print("connection closed")

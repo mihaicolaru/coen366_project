@@ -59,16 +59,17 @@ def parse_input(input_string):
         try:
             print("filename: ", string_set[1])  # get filename
         except IndexError:
-            Print("File not found")
+            print("File not found")
             return False, "error"
 
         FL = bin(len(string_set[1]))[2:] # get length of filename, append to request (5 bits)
-        i = 5 - len(FL)  # append filename to request
+        i = 5 - len(FL)
         while i > 0:
             request = request + "0"
             i = i - 1
         print("FL is ", str(FL))
-
+        request = request + str(FL)  # append filename length to request
+        request = request + string_set[1]  # append filename to request
         return True, request
     elif string_set[0] == "change":
         # add opcode
@@ -86,14 +87,16 @@ def parse_input(input_string):
             request = request + "0"
             i = i - 1
         print("FL is ", str(old_fl))
-        request = request + str(old_fl)   # append old filename to request
-        new_fl = bin(len(string_set[1]))[2:] # get length of new filename, append to request (1 byte)
+        request = request + str(old_fl)   # append old filename length to request
+        request = request + string_set[1]  # append old filename to request
+        new_fl = bin(len(string_set[2]))[2:] # get length of new filename, append to request (1 byte)
         i = 8 - len(new_fl)
         while i > 0:
             request = request + "0"
             i = i - 1
         print("FL is ", str(new_fl))
-        request = request + str(new_fl)     # append new filename to request
+        request = request + str(new_fl)    # append new filename length to request
+        request = request + string_set[2]  # append new filename to request
 
         return True, request
     elif string_set[0] == "help":

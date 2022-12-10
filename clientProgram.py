@@ -18,24 +18,50 @@ def parse_input(input_string):
         request = request + "000"
 
         # try catch to check if argument was passed
-        print("filename: ", string_set[1])  # put filename
+        try:
+            print("filename: ", string_set[1])  # put filename
+        except IndexError:
+            print("Filename not found")  # try open filename, file not found exception just prints file not found
+            return False, "error"
 
-        # try open filename, file not found exception just prints file not found
+        try:
+            file = open(string_set[1], "r")
+            print("file is open")
+        except Exception:
+            print("file not found")
+            return False, "error"
 
         # if file is open
-        # get length of filename, append to request (5 bits)
-        # append filename to request
-        # read file data into a new string
-        # get size of file data string (4 bytes), append to request
-        # append file data to request        
-        
+
+        FL = bin(len(string_set[1]))[2:]  # get length of filename, append to request (5 bits)
+        i = 5 - len(FL)
+        while i > 0:
+            request = request + "0"
+            i = i - 1
+        print("FL is ", str(FL))
+        request = request + str(FL)  # append filename length to request
+        request = request + string_set[1]  # append filename to request
+        file_data = file.read()  # read file data into a new string
+        FS = bin(len(file_data))[2:]  # get size of file data string (4 bytes), append to request
+        i = 32 - len(FS)
+        while i > 0:
+            request = request + "0"
+            i = i - 1
+        print("FS is ", str(FS))
+        request = request + str(FS)   # append file data length to request
+        request = request + file_data  # append file data to request
+
         return True, request
     elif string_set[0] == "get":
         # add opcode
         request = request + "001"
         # add try catch block to verify that argument was added
-        print("filename: ", string_set[1])  # get filename
-        
+        try:
+            print("filename: ", string_set[1])  # get filename
+        except IndexError:
+            Print("File not found")
+            return False, "error"
+
         # get length of filename, append to request (5 bits)
         # append filename to request
 
@@ -49,18 +75,18 @@ def parse_input(input_string):
         except IndexError:
             print("Filename missing")
             return False, "error"
-        
+
         # get length of old filename, append to request (5 bits)
         # append old filename to request
         # get length of new filename, append to request (1 byte)
         # append new filename to request
-        
+
         return True, request
     elif string_set[0] == "help":
         # add opcode
         request = request + "011" + "00000"
         print("help")  # help
-        
+
         return True, request
     elif string_set[0] == "bye":
         print("connection is going to terminate and exit")  # bye
@@ -69,13 +95,14 @@ def parse_input(input_string):
         print("incorrect input")
         return False, "error"
 
+
 while 1:
     # get user command from std input
     command = input(str("please enter command: "))
 
     # parse command
     send_request, request = parse_input(command)
-    
+
     # check if we need to get new command or terminate
     if not send_request:
         if request == "error":
@@ -89,7 +116,6 @@ while 1:
     # listen for response
     response = s.recv(1024)
     print(response.decode())
-
 
 # after loop, close conntection to server
 s.close()

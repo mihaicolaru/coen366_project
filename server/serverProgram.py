@@ -30,6 +30,7 @@ while 1:
     print(address," has been connected to the server")
     connected = True
 
+    response = ""
     while connected:
         # listen for request messages from client, in try catch block in case connection broken
         try:
@@ -41,6 +42,9 @@ while 1:
             break
         except BrokenPipeError:
             print("connection was broken")
+            break
+        except ConnectionAbortedError:
+            print("connection was aborted")
             break
 
         if len(request) == 0:
@@ -54,7 +58,9 @@ while 1:
         opcode = request[0:3]
         print("opcode: ",opcode)
 
+        response = ""
         if opcode == '000':
+            
             print("put command")
 
             print("rest of request: ",request[3:])
@@ -74,6 +80,8 @@ while 1:
             new_file = open(file_name, "w")
             new_file.write(file_data)
             new_file.close()
+            response = "00000000"
+
 
         elif opcode == '001':
             print("get command")
@@ -82,14 +90,25 @@ while 1:
             print("change command")
             print("rest of request: ",request[3:])
         elif opcode == '011':
+            # add rescode
+            response = "110"
             print("help command")
+            command_list = "list of acceptable commands:\nput (filename)\t\t\t\tsend file to server\nget (filename)\t\t\t\tget file from server\nchange (old filename) (new filename)\tchange server file name\nhelp\t\t\t\t\tdisplay this message"
+            list_length = bin(len(command_list))[2:]
+            i = 5 - len(list_length)
+            while i > 0:
+                response = response + "0"
+                i = i - 1
+            
+            response = response + str(list_length)
+            response = response + command_list
         else:
             print("opcode error")
+            
         
 
 
-        # send back response string
-        response = 'received: ' + request
+        # send back response
         try:
             connection.send(response.encode())
         except ConnectionResetError:

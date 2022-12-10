@@ -28,10 +28,9 @@ while 1:
     print("waiting for clients")
     connection, address = s.accept()
     print(address," has been connected to the server")
-    connected = True
 
     response = ""
-    while connected:
+    while True:
         # listen for request messages from client, in try catch block in case connection broken
         try:
             request = connection.recv(1024).decode()
@@ -58,6 +57,7 @@ while 1:
         opcode = request[0:3]
         print("opcode: ",opcode)
 
+        # put request
         response = ""
         if opcode == '000':
             
@@ -82,13 +82,47 @@ while 1:
             new_file.close()
             response = "00000000"
 
-
+        # get request
         elif opcode == '001':
             print("get command")
             print("rest of request: ",request[3:])
+
+            FL = int("0b" + request[3:8], 2)    # get filename length
+            print("filename length: ",FL)
+
+            file_name = request[8:8+FL]     # get filename
+            print("filename: ",file_name)
+
+            try:
+                response = "001" + request[3:8] + file_name   # add rescode, filename length and filename to response
+                print("successful response header: ", response)
+                
+                target_file = open(file_name, "r")  # open requested file
+                file_data = target_file.read()     # get file contents
+                target_file.close()
+
+                FS = bin(len(file_data))[2:]    # get size of file
+                i = 32 - len(FS)
+                while i > 0:
+                    response = response + "0"
+                    i = i - 1
+                response = response + str(FS)   # append file size (padded) to response
+                response = response + file_data # append file data to response
+                
+                print("full get response: ", response)
+            except FileNotFoundError:
+                print("file not found error")
+                response = "0100000"
+            except Exception:
+                print("file error")
+                response = "0100000"
+
+        # change request
         elif opcode == '010':
             print("change command")
             print("rest of request: ",request[3:])
+        
+        # help request
         elif opcode == '011':
             # add rescode
             response = "110"
@@ -102,12 +136,12 @@ while 1:
             
             response = response + str(list_length)
             response = response + command_list
+
         else:
-            print("opcode error")
+            print("unknown request error")
+            response = "01100000"
             
         
-
-
         # send back response
         try:
             connection.send(response.encode())

@@ -100,33 +100,31 @@ def parse_input(input_string):
     elif string_set[0] == "change":
         # add opcode
         request = request + "010"
-
         try:
             if debug:
                 print(f"change:\nold filename: {string_set[1]}\nnew filename: {string_set[2]} ")  # change old new
+            old_fl = bin(len(string_set[1]))[2:]  # get length of old filename, append to request (5 bits)
+            i = 5 - len(old_fl)
+            while i > 0:
+                request = request + "0"
+                i = i - 1
+                if debug:
+                    print("FL is ", str(old_fl))
+            request = request + str(old_fl)  # append old filename length to request
+            request = request + string_set[1]  # append old filename to request
+            new_fl = bin(len(string_set[2]))[2:]  # get length of new filename, append to request (1 byte)
+            i = 8 - len(new_fl)
+            while i > 0:
+                request = request + "0"
+                i = i - 1
+                if debug:
+                    print("FL is ", str(new_fl))
+            request = request + str(new_fl)  # append new filename length to request
+            request = request + string_set[2]  # append new filename to request
         except IndexError:
             if debug:
                 print("Filename missing")
             return False, "error"
-
-        old_fl = bin(len(string_set[1]))[2:] # get length of old filename, append to request (5 bits)
-        i = 5 - len(old_fl)
-        while i > 0:
-            request = request + "0"
-            i = i - 1
-            if debug:
-                print("FL is ", str(old_fl))
-        request = request + str(old_fl)   # append old filename length to request
-        request = request + string_set[1]  # append old filename to request
-        new_fl = bin(len(string_set[2]))[2:] # get length of new filename, append to request (1 byte)
-        i = 8 - len(new_fl)
-        while i > 0:
-            request = request + "0"
-            i = i - 1
-            if debug:
-                print("FL is ", str(new_fl))
-        request = request + str(new_fl)    # append new filename length to request
-        request = request + string_set[2]  # append new filename to request
 
         return True, request
     elif string_set[0] == "help":
@@ -179,11 +177,28 @@ while 1:
 
 
     res_code = response[0:3]
-    print("response", response)
+    if debug:
+        print("response", response)
     if res_code == '000':
         print("successful put or change")
     elif res_code == '001':
         print("successful get")
+        FL = int("0b" + response[3:8], 2)
+        print("filename length", FL)
+
+        file_name = response[8:8+FL]
+        print("filename", file_name)
+
+        FS = int("0b" + response[8+FL:8+FL+32], 2)
+        print("file size", FS)
+
+        file_data = response[8:FL+32:]
+        print("file data", file_data)
+
+        new_file = open(file_name, "w")
+        new_file.write(file_data)
+        new_file.close()
+
     elif res_code == '010':
         print("Error: File not found")
     elif res_code == '011':
@@ -191,7 +206,8 @@ while 1:
     elif res_code == '101':
         print("Unsuccessful change")
     elif res_code == '110':
-        print("Help")
+        help_message = response[8:]
+        print("help message: \n", help_message)
 
 # after loop, close connection to server
 s.close()

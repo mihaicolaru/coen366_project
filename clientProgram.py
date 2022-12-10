@@ -62,8 +62,12 @@ def parse_input(input_string):
             Print("File not found")
             return False, "error"
 
-        # get length of filename, append to request (5 bits)
-        # append filename to request
+        FL = bin(len(string_set[1]))[2:] # get length of filename, append to request (5 bits)
+        i = 5 - len(FL)  # append filename to request
+        while i > 0:
+            request = request + "0"
+            i = i - 1
+        print("FL is ", str(FL))
 
         return True, request
     elif string_set[0] == "change":
@@ -76,10 +80,20 @@ def parse_input(input_string):
             print("Filename missing")
             return False, "error"
 
-        # get length of old filename, append to request (5 bits)
-        # append old filename to request
-        # get length of new filename, append to request (1 byte)
-        # append new filename to request
+        old_fl = bin(len(string_set[1]))[2:] # get length of old filename, append to request (5 bits)
+        i = 5 - len(old_fl)
+        while i > 0:
+            request = request + "0"
+            i = i - 1
+        print("FL is ", str(old_fl))
+        request = request + str(old_fl)   # append old filename to request
+        new_fl = bin(len(string_set[1]))[2:] # get length of new filename, append to request (1 byte)
+        i = 8 - len(new_fl)
+        while i > 0:
+            request = request + "0"
+            i = i - 1
+        print("FL is ", str(new_fl))
+        request = request + str(new_fl)     # append new filename to request
 
         return True, request
     elif string_set[0] == "help":

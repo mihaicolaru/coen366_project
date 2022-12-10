@@ -153,6 +153,7 @@ while 1:
     # check if we need to get new command or terminate
     if not send_request:
         if request == "error":
+            print("Incorrect command")
             continue
         else:
             break
@@ -174,7 +175,6 @@ while 1:
     except ConnectionAbortedError:
         print("connection was aborted")
         break
-
 
     res_code = response[0:3]
     if debug:

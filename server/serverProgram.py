@@ -8,22 +8,27 @@ try:
 except IndexError:
     quit("no port given") 
 
+debug = False
+
+# get debug bit
 try:
     print("debug enabled: ", sys.argv[2])
-    if sys.argv[2] == 1:
+    if sys.argv[2] == "1":
         debug = True
     else:
         debug = False
+
+    print(debug)
 except IndexError:
     quit("debug bit not given")
 
 s = socket.socket()
 host = '127.0.0.1'
 port = sys.argv[1]
-# port = input(str("enter port server will listen on: "))
 s.bind((host,int(port)))
 s.listen(1)
-print(host)
+if debug:
+    print(host)
 
 while 1:
     print("waiting for clients")
@@ -48,35 +53,40 @@ while 1:
             break
 
         if len(request) == 0:
-            print("no data")
+            if debug:
+                print("no data")
             break
-
-        print("request: ",request)
+        if debug:
+            print("request: ",request)
 
         # parse request message
         # 3 first characters: opcode
         opcode = request[0:3]
-        print("opcode: ",opcode)
+        if debug:
+            print("opcode: ",opcode)
 
         # put request
         response = ""
-        if opcode == '000':
-            
+        if opcode == '000':            
             print("put command")
-
-            print("rest of request: ",request[3:])
+            if debug:
+                print("rest of request: ",request[3:])
 
             FL = int("0b" + request[3:8], 2)
-            print("filename length: ",FL)
+            if debug:
+                print("filename length: ",FL)
 
             file_name = request[8:8+FL]
-            print("filename: ",file_name)
+            if debug:
+                print("filename: ",file_name)
             
             FS = int("0b" + request[8+FL:8+FL+32], 2)
-            print("file size: ",FS)
+            if debug:
+                print("file size: ",FS)
 
             file_data = request[8+FL+32:]
-            print("file data: ",file_data)
+            if debug:
+                print("file data: ",file_data)
 
             new_file = open(file_name, "w")
             new_file.write(file_data)
@@ -86,17 +96,21 @@ while 1:
         # get request
         elif opcode == '001':
             print("get command")
-            print("rest of request: ",request[3:])
+            if debug:
+                print("rest of request: ",request[3:])
 
             FL = int("0b" + request[3:8], 2)    # get filename length
-            print("filename length: ",FL)
+            if debug:
+                print("filename length: ",FL)
 
             file_name = request[8:8+FL]     # get filename
-            print("filename: ",file_name)
+            if debug:
+                print("filename: ",file_name)
 
             try:
                 response = "001" + request[3:8] + file_name   # add rescode, filename length and filename to response
-                print("successful response header: ", response)
+                if debug:
+                    print("successful response header: ", response)
                 
                 target_file = open(file_name, "r")  # open requested file
                 file_data = target_file.read()     # get file contents
@@ -110,7 +124,8 @@ while 1:
                 response = response + str(FS)   # append file size (padded) to response
                 response = response + file_data # append file data to response
                 
-                print("full get response: ", response)
+                if debug:
+                    print("full get response: ", response)
             except FileNotFoundError:
                 print("file not found error")
                 response = "0100000"
@@ -123,19 +138,24 @@ while 1:
             try:
                 response = "00000000"
                 print("change command")
-                print("rest of request: ",request[3:])
+                if debug:
+                    print("rest of request: ",request[3:])
 
                 old_fl = int("0b" + request[3:8], 2)
-                print("old filename size: ",old_fl)
+                if debug:
+                    print("old filename size: ",old_fl)
 
                 old_filename = request[8:8+old_fl]
-                print("old filename: ", old_filename)
+                if debug:
+                    print("old filename: ", old_filename)
 
                 new_fl = int("0b" + request[8+old_fl:8+old_fl+8], 2)
-                print("new filename size: ",new_fl)
+                if debug:
+                    print("new filename size: ",new_fl)
 
                 new_filename = request[8+old_fl+8:]
-                print("new filename: ", new_filename)
+                if debug:
+                    print("new filename: ", new_filename)
             except IndexError:
                 print("filename missing")
                 response = "10100000"
@@ -155,8 +175,12 @@ while 1:
             # add rescode
             response = "110"
             print("help command")
-            command_list = "put, get, change , help, bye"
+            command_list = "put, get, change, help, bye"
+            if debug:
+                print("list of commands: ", command_list)
             list_length = bin(len(command_list))[2:]
+            if debug:
+                print("help response length: ", list_length)
             i = 5 - len(list_length)
             while i > 0:
                 response = response + "0"
@@ -165,6 +189,8 @@ while 1:
             response = response + str(list_length)
             response = response + command_list
 
+            if debug:
+                print("full help response: ", response)
         else:
             print("unknown request error")
             response = "01100000"

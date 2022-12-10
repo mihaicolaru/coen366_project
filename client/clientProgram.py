@@ -10,7 +10,7 @@ except IndexError:
 
 try:
     print("Debug enabled:", sys.argv[3])
-    if sys.argv[3] == 1:
+    if sys.argv[3] == "1":
         debug = True
     else:
         debug = False
@@ -174,7 +174,7 @@ while 1:
 
     res_code = response[0:3]
     if debug:
-        print("response", response)
+        print("response ", response)
     if res_code == '000':
         print("successful put or change")
     elif res_code == '001':
@@ -204,7 +204,7 @@ while 1:
         print("Unsuccessful change")
     elif res_code == '110':
         help_message = response[8:]
-        print("help message:\n", help_message)
+        print("available commands:", help_message)
 
 # after loop, close connection to server
 s.close()

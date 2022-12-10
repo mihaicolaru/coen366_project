@@ -36,16 +36,20 @@ def parse_input(input_string):
 
         # try catch to check if argument was passed
         try:
-            print("filename: ", string_set[1])  # put filename
+            if debug:
+                print("filename: ", string_set[1])  # put filename
         except IndexError:
-            print("Filename not found")  # try open filename, file not found exception just prints file not found
+            if debug:
+                print("Filename not found")  # try open filename, file not found exception just prints file not found
             return False, "error"
 
         try:
             file = open(string_set[1], "r")
-            print("file is open")
+            if debug:
+                print("file is open")
         except Exception:
-            print("file not found")
+            if debug:
+                print("file not found")
             return False, "error"
 
         # if file is open
@@ -55,7 +59,8 @@ def parse_input(input_string):
         while i > 0:
             request = request + "0"
             i = i - 1
-        print("FL is ", str(FL))
+            if debug:
+                print("FL is ", str(FL))
         request = request + str(FL)  # append filename length to request
         request = request + string_set[1]  # append filename to request
         file_data = file.read()  # read file data into a new string
@@ -64,7 +69,8 @@ def parse_input(input_string):
         while i > 0:
             request = request + "0"
             i = i - 1
-        print("FS is ", str(FS))
+            if debug:
+                print("FS is ", str(FS))
         request = request + str(FS)   # append file data length to request
         request = request + file_data  # append file data to request
 
@@ -74,9 +80,11 @@ def parse_input(input_string):
         request = request + "001"
         # add try catch block to verify that argument was added
         try:
-            print("filename: ", string_set[1])  # get filename
+            if debug:
+                print("filename: ", string_set[1])  # get filename
         except IndexError:
-            print("File not found")
+            if debug:
+                print("File not found")
             return False, "error"
 
         FL = bin(len(string_set[1]))[2:] # get length of filename, append to request (5 bits)
@@ -84,7 +92,8 @@ def parse_input(input_string):
         while i > 0:
             request = request + "0"
             i = i - 1
-        print("FL is ", str(FL))
+            if debug:
+                print("FL is ", str(FL))
         request = request + str(FL)  # append filename length to request
         request = request + string_set[1]  # append filename to request
         return True, request
@@ -93,9 +102,11 @@ def parse_input(input_string):
         request = request + "010"
 
         try:
-            print(f"change:\nold filename: {string_set[1]}\nnew filename: {string_set[2]} ")  # change old new
+            if debug:
+                print(f"change:\nold filename: {string_set[1]}\nnew filename: {string_set[2]} ")  # change old new
         except IndexError:
-            print("Filename missing")
+            if debug:
+                print("Filename missing")
             return False, "error"
 
         old_fl = bin(len(string_set[1]))[2:] # get length of old filename, append to request (5 bits)
@@ -103,7 +114,8 @@ def parse_input(input_string):
         while i > 0:
             request = request + "0"
             i = i - 1
-        print("FL is ", str(old_fl))
+            if debug:
+                print("FL is ", str(old_fl))
         request = request + str(old_fl)   # append old filename length to request
         request = request + string_set[1]  # append old filename to request
         new_fl = bin(len(string_set[2]))[2:] # get length of new filename, append to request (1 byte)
@@ -111,7 +123,8 @@ def parse_input(input_string):
         while i > 0:
             request = request + "0"
             i = i - 1
-        print("FL is ", str(new_fl))
+            if debug:
+                print("FL is ", str(new_fl))
         request = request + str(new_fl)    # append new filename length to request
         request = request + string_set[2]  # append new filename to request
 
@@ -119,14 +132,16 @@ def parse_input(input_string):
     elif string_set[0] == "help":
         # add opcode
         request = request + "011" + "00000"
-        print("help")  # help
-
+        if debug:
+            print("help")  # help
         return True, request
     elif string_set[0] == "bye":
-        print("connection is going to terminate and exit")  # bye
+        if debug:
+            print("connection is going to terminate and exit")  # bye
         return False, request
     else:
-        print("incorrect input")
+        if debug:
+            print("incorrect input")
         return False, "error"
 
 
@@ -148,8 +163,35 @@ while 1:
     s.send(request.encode())
 
     # listen for response
-    response = s.recv(1024)
-    print(response.decode())
+    try:
+        response = s.recv(1024).decode()
+    except BlockingIOError:
+        print("reading")
+    except ConnectionResetError:
+        print("connection was reset")
+        break
+    except BrokenPipeError:
+        print("connection was broken")
+        break
+    except ConnectionAbortedError:
+        print("connection was aborted")
+        break
+
+
+    res_code = response[0:3]
+    print("response", response)
+    if res_code == '000':
+        print("successful put or change")
+    elif res_code == '001':
+        print("successful get")
+    elif res_code == '010':
+        print("Error: File not found")
+    elif res_code == '011':
+        print("Error: Unknown request")
+    elif res_code == '101':
+        print("Unsuccessful change")
+    elif res_code == '110':
+        print("Help")
 
 # after loop, close connection to server
 s.close()

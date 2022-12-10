@@ -59,8 +59,8 @@ def parse_input(input_string):
         while i > 0:
             request = request + "0"
             i = i - 1
-            if debug:
-                print("FL is ", str(FL))
+        if debug:
+            print("FL is ", str(FL))
         request = request + str(FL)  # append filename length to request
         request = request + string_set[1]  # append filename to request
         file_data = file.read()  # read file data into a new string
@@ -69,8 +69,8 @@ def parse_input(input_string):
         while i > 0:
             request = request + "0"
             i = i - 1
-            if debug:
-                print("FS is ", str(FS))
+        if debug:
+            print("FS is ", str(FS))
         request = request + str(FS)   # append file data length to request
         request = request + file_data  # append file data to request
 
@@ -92,8 +92,8 @@ def parse_input(input_string):
         while i > 0:
             request = request + "0"
             i = i - 1
-            if debug:
-                print("FL is ", str(FL))
+        if debug:
+            print("FL is ", str(FL))
         request = request + str(FL)  # append filename length to request
         request = request + string_set[1]  # append filename to request
         return True, request
@@ -108,8 +108,8 @@ def parse_input(input_string):
             while i > 0:
                 request = request + "0"
                 i = i - 1
-                if debug:
-                    print("FL is ", str(old_fl))
+            if debug:
+                print("FL is ", str(old_fl))
             request = request + str(old_fl)  # append old filename length to request
             request = request + string_set[1]  # append old filename to request
             new_fl = bin(len(string_set[2]))[2:]  # get length of new filename, append to request (1 byte)
@@ -117,8 +117,8 @@ def parse_input(input_string):
             while i > 0:
                 request = request + "0"
                 i = i - 1
-                if debug:
-                    print("FL is ", str(new_fl))
+            if debug:
+                print("FL is ", str(new_fl))
             request = request + str(new_fl)  # append new filename length to request
             request = request + string_set[2]  # append new filename to request
         except IndexError:

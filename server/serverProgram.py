@@ -120,23 +120,35 @@ while 1:
 
         # change request
         elif opcode == '010':
-            print("change command")
-            print("rest of request: ",request[3:])
+            try:
+                response = "00000000"
+                print("change command")
+                print("rest of request: ",request[3:])
 
-            old_fl = int("0b" + response[3:8])
-            print("old filename size: ",old_fl)
+                old_fl = int("0b" + request[3:8], 2)
+                print("old filename size: ",old_fl)
 
-            old_filename = request[8:8+old_fl]
-            print("old filename: ", old_filename)
+                old_filename = request[8:8+old_fl]
+                print("old filename: ", old_filename)
 
-            new_fl = int("0b" + response[8+old_fl:8+old_fl+8])
-            print("old filename size: ",old_fl)
+                new_fl = int("0b" + request[8+old_fl:8+old_fl+8], 2)
+                print("new filename size: ",new_fl)
 
-            new_filename = request[8+old_fl+8:]
-            print("old filename: ", new_filename)
-
-
-
+                new_filename = request[8+old_fl+8:]
+                print("new filename: ", new_filename)
+            except IndexError:
+                print("filename missing")
+                response = "10100000"
+            
+            try:
+                os.rename(old_filename.encode(), new_filename.encode())
+                print("changed name successfully")
+            except FileNotFoundError:
+                print("file not found")
+                response = "10100000"
+            except Exception:
+                print("could not rename file")
+                response = "10100000"
         
         # help request
         elif opcode == '011':

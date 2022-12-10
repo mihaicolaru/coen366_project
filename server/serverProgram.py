@@ -1,5 +1,6 @@
 import socket
 import sys
+import os
 
 # get port number
 try:
@@ -121,13 +122,28 @@ while 1:
         elif opcode == '010':
             print("change command")
             print("rest of request: ",request[3:])
+
+            old_fl = int("0b" + response[3:8])
+            print("old filename size: ",old_fl)
+
+            old_filename = request[8:8+old_fl]
+            print("old filename: ", old_filename)
+
+            new_fl = int("0b" + response[8+old_fl:8+old_fl+8])
+            print("old filename size: ",old_fl)
+
+            new_filename = request[8+old_fl+8:]
+            print("old filename: ", new_filename)
+
+
+
         
         # help request
         elif opcode == '011':
             # add rescode
             response = "110"
             print("help command")
-            command_list = "list of acceptable commands:\nput (filename)\t\t\t\tsend file to server\nget (filename)\t\t\t\tget file from server\nchange (old filename) (new filename)\tchange server file name\nhelp\t\t\t\t\tdisplay this message"
+            command_list = "put, get, change , help, bye"
             list_length = bin(len(command_list))[2:]
             i = 5 - len(list_length)
             while i > 0:

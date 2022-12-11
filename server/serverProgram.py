@@ -36,7 +36,7 @@ while 1:
     print(address," has been connected to the server")
 
     response = ""
-    while True:
+    while 1:
         # listen for request messages from client, in try catch block in case connection broken
         try:
             request = connection.recv(1024).decode()
@@ -83,14 +83,34 @@ while 1:
             FS = int("0b" + request[8+FL:8+FL+32], 2)
             if debug:
                 print("file size: ",FS)
+            
+            # loop receive based on file size
 
-            file_data = request[8+FL+32:]
-            if debug:
-                print("file data: ",file_data)
+            num_reads = FS/1024
+            with open(file_name, "wb") as new_file:
+                while num_reads > 0:
+                    print("getting file data chunk")
+                    try:
+                        file_data = connection.recv(1024)
+                    except BlockingIOError:
+                        print("reading")
+                    except ConnectionResetError:
+                        print("connection was reset")
+                        break
+                    except BrokenPipeError:
+                        print("connection was broken")
+                        break
+                    except ConnectionAbortedError:
+                        print("connection was aborted")
+                        break
 
-            new_file = open(file_name, "w")
-            new_file.write(file_data)
+                    new_file.write(file_data)
+
+                    num_reads = num_reads - 1
             new_file.close()
+            # if debug:
+            #     print("file data: ",file_data)
+            
             response = "00000000"
 
         # get request
@@ -195,7 +215,8 @@ while 1:
             print("unknown request error")
             response = "01100000"
             
-        
+        if debug:
+            print("sending response")
         # send back response
         try:
             connection.send(response.encode())

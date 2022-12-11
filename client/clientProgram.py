@@ -27,7 +27,7 @@ print("client is connected....")
 
 # get user command from std input
 # generate request msg in switch according to command
-def parse_input(input_string):
+def parse_input(s, input_string):
     request = ""
     string_set = input_string.split(" ")
     if string_set[0] == 'put':
@@ -61,7 +61,9 @@ def parse_input(input_string):
             print("FL is ", str(FL))
         request = request + str(FL)  # append filename length to request
         request = request + string_set[1]  # append filename to request
+
         file_data = file.read()  # read file data into a new string
+        file.close()
         FS = bin(len(file_data))[2:]  # get size of file data string (4 bytes), append to request
         i = 32 - len(FS)
         while i > 0:
@@ -70,9 +72,23 @@ def parse_input(input_string):
         if debug:
             print("FS is ", str(FS))
         request = request + str(FS)   # append file data length to request
-        request = request + str(file_data)  # append file data to request
+        # send the header
+        s.send(request.encode())
 
-        return True, request
+        # num_send = FS * (1024/8)
+        counter = 0
+        with open(string_set[1], "rb") as file:
+            while 1:
+                read_bytes = file.read(1024)
+                if not read_bytes:
+                    if debug:
+                        print("end of file reached")
+                    break
+                s.send(read_bytes)
+                counter = counter + 1
+            print("number of sends: ", counter)
+        file.close()
+        return False, "put"
     elif string_set[0] == "get":
         # add opcode
         request = request + "001"
@@ -144,18 +160,23 @@ while 1:
     command = input(str("please enter command: "))
 
     # parse command
-    send_request, request = parse_input(command)
+    send_request, request = parse_input(s, command)
 
     # check if we need to get new command or terminate
     if not send_request:
         if request == "error":
             print("Incorrect command")
             continue
+        elif request == "put":
+            if debug:
+                print("put command")
+            pass
         else:
             break
-
-    # send request msg to server
-    s.send(request.encode())
+    else:
+        # send request msg to server
+        s.send(request.encode())
+    
 
     # listen for response
     try:

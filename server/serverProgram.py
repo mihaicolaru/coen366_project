@@ -89,7 +89,8 @@ while 1:
             num_reads = FS/1024
             with open(file_name, "wb") as new_file:
                 while num_reads > 0:
-                    print("getting file data chunk")
+                    if debug:
+                        print("getting file data chunk")
                     try:
                         file_data = connection.recv(1024)
                     except BlockingIOError:
@@ -132,7 +133,7 @@ while 1:
                 if debug:
                     print("successful response header: ", response)
                 
-                target_file = open(file_name, "r")  # open requested file
+                target_file = open(file_name, "rb")  # open requested file
                 file_data = target_file.read()     # get file contents
                 target_file.close()
 
@@ -142,10 +143,33 @@ while 1:
                     response = response + "0"
                     i = i - 1
                 response = response + str(FS)   # append file size (padded) to response
-                response = response + file_data # append file data to response
-                
+
                 if debug:
-                    print("full get response: ", response)
+                    print("sending response")
+                # send back response
+                try:
+                    connection.send(response.encode())
+                except ConnectionResetError:
+                    print("connection was reset")
+                    break
+                except BrokenPipeError:
+                    print("connection was broken")
+                    break
+                except ConnectionAbortedError:
+                    print("connection was aborted")
+                    break
+
+                with open(file_name, "rb") as target_file:
+                    while 1:
+                        read_bytes = target_file.read(1024)
+                        if not read_bytes:
+                            if debug:
+                                print("end of target file reached")
+                            break
+                        connection.send(read_bytes)
+                target_file.close()
+                continue
+            
             except FileNotFoundError:
                 print("file not found error")
                 response = "0100000"

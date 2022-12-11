@@ -86,7 +86,8 @@ def parse_input(s, input_string):
                     break
                 s.send(read_bytes)
                 counter = counter + 1
-            print("number of sends: ", counter)
+            if debug:
+                print("number of sends: ", counter)
         file.close()
         return False, "put"
     elif string_set[0] == "get":
@@ -213,10 +214,30 @@ while 1:
         if debug:
             print("file data", file_data)
         
-        # try catch
-        new_file = open(file_name, "wb")
-        new_file.write(file_data)
+        num_reads = FS/1024
+        with open(file_name, "wb") as new_file:
+            while num_reads > 0:
+                if debug:
+                    print("getting file data chunk")
+                try:
+                    file_data = s.recv(1024)
+                except BlockingIOError:
+                    print("reading")
+                except ConnectionResetError:
+                    print("connection was reset")
+                    break
+                except BrokenPipeError:
+                    print("connection was broken")
+                    break
+                except ConnectionAbortedError:
+                    print("connection was aborted")
+                    break
+
+                new_file.write(file_data)
+
+                num_reads = num_reads - 1
         new_file.close()
+
 
     elif res_code == '010':
         print("Error: File not found")

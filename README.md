@@ -34,4 +34,4 @@ server and client must typically be in different directories (localhost)
 4. bye command terminates client
 
 files that are to be transfered from the client must be in the same directory as the program source file
-test folder included in the project can be used to verify program functioning be copying the files to the client directory
+tests folder included in the project can be used to verify program functioning be copying the files to the client directory

@@ -1,3 +1,8 @@
+# Mihai Olaru 40111734
+# Charlie Huang 40111215
+# this file contains the implementation for the server side of the project
+# we are the sole authors this file
+
 import socket
 import sys
 
